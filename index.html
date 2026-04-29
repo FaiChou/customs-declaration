@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>申报资料速查</title>
+  <style>
+    :root {
+      --ink: #14231f;
+      --muted: #66736e;
+      --paper: #f7f3ea;
+      --panel: #fffdf8;
+      --line: #ded7ca;
+      --accent: #db4d2d;
+      --accent-dark: #9f3320;
+      --olive: #526348;
+      --blue: #1f6373;
+      --shadow: 0 18px 50px rgba(42, 35, 24, .12);
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-height: 100%;
+      background:
+        linear-gradient(135deg, rgba(219, 77, 45, .10), transparent 34%),
+        linear-gradient(315deg, rgba(31, 99, 115, .12), transparent 38%),
+        var(--paper);
+    }
+
+    body {
+      min-height: 100%;
+      margin: 0;
+      color: var(--ink);
+      font-family: "Avenir Next", "PingFang SC", "Microsoft YaHei", sans-serif;
+      letter-spacing: 0;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .shell {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 34px 0 44px;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 22px;
+      align-items: end;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", "Songti SC", serif;
+      font-size: clamp(30px, 6vw, 58px);
+      line-height: .98;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      max-width: 660px;
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    .counter {
+      min-width: 116px;
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      background: rgba(255, 253, 248, .72);
+      box-shadow: var(--shadow);
+      text-align: right;
+    }
+
+    .counter strong {
+      display: block;
+      color: var(--accent-dark);
+      font-size: 32px;
+      line-height: 1;
+    }
+
+    .counter span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 4;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      padding: 12px;
+      margin-bottom: 18px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(247, 243, 234, .86);
+      backdrop-filter: blur(18px);
+      box-shadow: 0 10px 32px rgba(42, 35, 24, .08);
+    }
+
+    .search {
+      display: grid;
+      grid-template-columns: 22px minmax(0, 1fr);
+      align-items: center;
+      gap: 10px;
+      min-height: 46px;
+      padding: 0 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+    }
+
+    .search svg {
+      width: 18px;
+      height: 18px;
+      color: var(--olive);
+    }
+
+    .search input {
+      width: 100%;
+      min-width: 0;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: var(--ink);
+      font-size: 16px;
+    }
+
+    .search input::placeholder {
+      color: #8a928f;
+    }
+
+    .clear {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 46px;
+      min-height: 46px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      color: var(--ink);
+      cursor: pointer;
+      transition: transform .18s ease, border-color .18s ease, color .18s ease;
+    }
+
+    .clear:hover {
+      transform: translateY(-1px);
+      border-color: var(--accent);
+      color: var(--accent-dark);
+    }
+
+    .clear svg {
+      width: 19px;
+      height: 19px;
+    }
+
+    .list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .item {
+      display: grid;
+      grid-template-columns: 150px minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: center;
+      min-height: 72px;
+      padding: 15px 16px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 253, 248, .88);
+      box-shadow: 0 10px 28px rgba(42, 35, 24, .07);
+      cursor: pointer;
+      transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+
+    .item:hover,
+    .item:focus-visible {
+      transform: translateY(-2px);
+      border-color: rgba(219, 77, 45, .56);
+      background: var(--panel);
+      box-shadow: 0 18px 42px rgba(42, 35, 24, .12);
+      outline: 0;
+    }
+
+    .item.copied {
+      border-color: rgba(31, 99, 115, .72);
+      box-shadow: 0 18px 42px rgba(31, 99, 115, .18);
+    }
+
+    .name {
+      min-width: 0;
+      font-size: 19px;
+      font-weight: 700;
+      color: var(--ink);
+      word-break: break-word;
+    }
+
+    .copy-text {
+      min-width: 0;
+      color: #2d3935;
+      font-size: 15px;
+      line-height: 1.55;
+      word-break: break-word;
+    }
+
+    .code {
+      justify-self: end;
+      min-width: 104px;
+      padding: 8px 10px;
+      border: 1px solid rgba(82, 99, 72, .34);
+      border-radius: var(--radius);
+      color: var(--blue);
+      background: rgba(31, 99, 115, .06);
+      font-family: "SF Mono", Menlo, Consolas, monospace;
+      font-size: 13px;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .empty {
+      display: none;
+      padding: 38px 22px;
+      border: 1px dashed var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 253, 248, .56);
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 22px;
+      z-index: 8;
+      max-width: calc(100% - 32px);
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      background: #14231f;
+      color: #fffdf8;
+      box-shadow: 0 14px 40px rgba(20, 35, 31, .28);
+      font-size: 14px;
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(-50%, 12px);
+      transition: opacity .2s ease, transform .2s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    mark {
+      padding: 0 2px;
+      border-radius: 3px;
+      background: rgba(219, 77, 45, .18);
+      color: inherit;
+    }
+
+    @media (max-width: 720px) {
+      .shell {
+        width: min(100% - 22px, 520px);
+        padding: 24px 0 34px;
+      }
+
+      .topbar {
+        grid-template-columns: 1fr;
+        gap: 14px;
+        align-items: stretch;
+      }
+
+      .subtitle {
+        font-size: 14px;
+      }
+
+      .counter {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        text-align: left;
+      }
+
+      .counter strong {
+        font-size: 28px;
+      }
+
+      .toolbar {
+        grid-template-columns: minmax(0, 1fr) 46px;
+        margin-left: -1px;
+        margin-right: -1px;
+      }
+
+      .item {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 8px;
+        padding: 14px;
+      }
+
+      .name {
+        font-size: 18px;
+      }
+
+      .copy-text {
+        font-size: 14px;
+      }
+
+      .code {
+        justify-self: start;
+        min-width: auto;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <h1>申报资料速查</h1>
+        <p class="subtitle">点任意一条即可复制完整文本；搜索支持中文、英文和编码。</p>
+      </div>
+      <div class="counter" aria-live="polite">
+        <strong id="visibleCount">0</strong>
+        <span id="totalCount">条资料</span>
+      </div>
+    </header>
+
+    <section class="toolbar" aria-label="搜索工具">
+      <label class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="11" cy="11" r="7"></circle>
+          <path d="m20 20-3.5-3.5"></path>
+        </svg>
+        <input id="query" type="search" placeholder="搜索：水杯 / cup / 9617" autocomplete="off">
+      </label>
+      <button class="clear" id="clearSearch" type="button" title="清空搜索" aria-label="清空搜索">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M18 6 6 18"></path>
+          <path d="m6 6 12 12"></path>
+        </svg>
+      </button>
+    </section>
+
+    <section class="list" id="list" aria-label="申报资料列表"></section>
+    <p class="empty" id="empty">没有匹配的资料</p>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const records = [
+      {"name":"帆布鞋","text":"男士帆布休闲鞋 Men's canvas shoes 6405200090"},
+      {"name":"手提包","text":"棉帆布单肩包 Cotton canvas shoulder bag 4202220000"},
+      {"name":"衣服","text":"化纤运动休闲服 Chemical fiber sports suit 6103230000"},
+      {"name":"水杯","text":"双层不锈钢水杯 Stainless Steel Cup 9617001900"},
+      {"name":"工艺品","text":"合金字母挂饰 Alloy letter pendant 7117190000"},
+      {"name":"袜子","text":"棉混纺运动短袜 Cotton Blend Athletic socks 6115950019"},
+      {"name":"腰带","text":"聚氨酯皮革腰带 Polyurethane Leather Belt 8306299000"},
+      {"name":"拖鞋","text":"防滑EVA拖鞋 Non-slip EVA Slippers 6405200090"},
+      {"name":"T恤","text":"聚酯纤维短袖T恤 Polyester Short-Sleeve T-Shirt 6109100021"},
+      {"name":"长裤","text":"男士休闲长裤 Men's casual trousers 6203439090"},
+      {"name":"靴子","text":"低跟防滑短靴 Synthetic Leather Low-Heel Ankle Boots 6403911190"},
+      {"name":"短裤","text":"松紧腰休闲短裤 Elastic waist casual shorts 6204630000"},
+      {"name":"塑料支架","text":"塑料支架 Plastic\u00a0support 3926400000"},
+      {"name":"棒球帽","text":"男式纯色棒球帽 Men's solid baseball cap 6505002000"},
+      {"name":"渔夫帽","text":"聚酯纤维渔夫帽 Polyester Bucket Hat 6506910000"},
+      {"name":"手机壳","text":"塑料哑光手机壳 Plastic Matte Phone Case 3926400000"},
+      {"name":"钥匙扣","text":"便携式塑料钥匙扣 Plastic key chain pendant 3926400000"},
+      {"name":"纽扣","text":"服装塑料纽扣 plastic buttons for clothing 9606210000"},
+      {"name":"泳衣","text":"女式聚酯纤维泳衣 Women's Polyester Swimwear Set 6112410000"},
+      {"name":"围巾","text":"聚酯纤维围巾 Polyester scarf 6214400000"},
+      {"name":"睡帽","text":"人造纤维松紧睡帽 Synthetic Fiber Elastic Sleep Cap 6506910000"},
+      {"name":"睫毛","text":"化纤假睫毛 Synthetic eyelashes 67041900"},
+      {"name":"假发","text":"发帘 synthetic hair 67041900"},
+      {"name":"毛毯","text":"聚酯纤维毛毯  Polyester Fiber Blanket 6301400000"},
+      {"name":"束腰带","text":"聚酯纤维束腰带 Polyester fiber bundle belt 6117809000"},
+      {"name":"橡胶按摩仪","text":"橡胶按摩仪 Rubber massager 8543709990"},
+      {"name":"香片","text":"装饰用纸质小卡片 Decorative Paper Mini Cards 4909009000"},
+      {"name":"docker compose 更新容器","text":"docker compose pull && docker compose up -d --force-recreate"}
+    ];
+
+    const list = document.querySelector("#list");
+    const query = document.querySelector("#query");
+    const clearSearch = document.querySelector("#clearSearch");
+    const visibleCount = document.querySelector("#visibleCount");
+    const totalCount = document.querySelector("#totalCount");
+    const empty = document.querySelector("#empty");
+    const toast = document.querySelector("#toast");
+    let toastTimer;
+
+    totalCount.textContent = `共 ${records.length} 条`;
+
+    function getCode(text) {
+      const match = text.match(/\b\d{8,10}\b/);
+      return match ? match[0] : "命令";
+    }
+
+    function escapeHtml(value) {
+      return value.replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;",
+        "'": "&#039;"
+      }[char]));
+    }
+
+    function highlight(value, term) {
+      const escaped = escapeHtml(value);
+      if (!term) return escaped;
+      const safeTerm = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      return escaped.replace(new RegExp(safeTerm, "gi"), match => `<mark>${match}</mark>`);
+    }
+
+    async function copyText(text, item) {
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch (error) {
+        const area = document.createElement("textarea");
+        area.value = text;
+        area.setAttribute("readonly", "");
+        area.style.position = "fixed";
+        area.style.top = "-999px";
+        document.body.appendChild(area);
+        area.select();
+        document.execCommand("copy");
+        area.remove();
+      }
+
+      document.querySelectorAll(".item.copied").forEach(node => node.classList.remove("copied"));
+      item.classList.add("copied");
+      showToast(`已复制：${text}`);
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove("show"), 1700);
+    }
+
+    function render() {
+      const term = query.value.trim();
+      const lowerTerm = term.toLowerCase();
+      const filtered = records.filter(record => {
+        const haystack = `${record.name} ${record.text}`.toLowerCase();
+        return haystack.includes(lowerTerm);
+      });
+
+      list.innerHTML = filtered.map((record, index) => `
+        <article class="item" tabindex="0" role="button" data-index="${index}" aria-label="复制 ${escapeHtml(record.name)}">
+          <div class="name">${highlight(record.name, term)}</div>
+          <div class="copy-text">${highlight(record.text, term)}</div>
+          <div class="code">${getCode(record.text)}</div>
+        </article>
+      `).join("");
+
+      [...list.children].forEach((item, index) => {
+        const record = filtered[index];
+        item.addEventListener("click", () => copyText(record.text, item));
+        item.addEventListener("keydown", event => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            copyText(record.text, item);
+          }
+        });
+      });
+
+      visibleCount.textContent = filtered.length;
+      empty.style.display = filtered.length ? "none" : "block";
+    }
+
+    query.addEventListener("input", render);
+    clearSearch.addEventListener("click", () => {
+      query.value = "";
+      query.focus();
+      render();
+    });
+
+    render();
+  </script>
+</body>
+</html>
